@@ -1186,6 +1186,9 @@ class Runner:
         try:
             parsed = datetime.strptime(value, _DATE_FMT)
             if end_of_day:
+                now_utc = datetime.now(timezone.utc)
+                if parsed.date() == now_utc.date():
+                    return now_utc.replace(tzinfo=None).strftime(_TS_FMT)
                 parsed = parsed.replace(hour=23, minute=59, second=59)
             return parsed.strftime(_TS_FMT)
         except Exception:
