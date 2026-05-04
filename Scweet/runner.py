@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import inspect
 import json
@@ -901,6 +901,7 @@ class Runner:
 
                 await limiter.acquire()
 
+                page_request_sent_at = datetime.now(timezone.utc)
                 try:
                     response = await _maybe_await(self.search_engine.search_tweets(request_payload))
                 except Exception as exc:
@@ -956,9 +957,22 @@ class Runner:
 
                     if unique_added > 0:
                         if global_limit is not None:
-                            logger.info("Collected %d / %d tweets", total_collected, global_limit)
+                            logger.info(
+                                "%s ~ %s: Collected %d / %d tweets sent_at=%s",
+                                task_query.get("since"),
+                                task_query.get("until"),
+                                total_collected,
+                                global_limit,
+                                page_request_sent_at.isoformat(),
+                            )
                         else:
-                            logger.info("Collected %d tweets", total_collected)
+                            logger.info(
+                                "%s ~ %s: Collected %d tweets sent_at=%s",
+                                task_query.get("since"),
+                                task_query.get("until"),
+                                total_collected,
+                                page_request_sent_at.isoformat(),
+                            )
 
                     if page_unique_tweets and on_tweets_batch is not None:
                         try:
@@ -991,7 +1005,10 @@ class Runner:
                     )
                     if stop_due_to_empty_pages:
                         logger.info(
-                            "Search done (no more results) account=%s",
+                            "%s ~ %s: Search done (no more results) sent_at=%s account=%s",
+                            task_query.get("since"),
+                            task_query.get("until"),
+                            page_request_sent_at.isoformat(),
                             account.get("username"),
                         )
 
@@ -1186,6 +1203,9 @@ class Runner:
         try:
             parsed = datetime.strptime(value, _DATE_FMT)
             if end_of_day:
+                now_utc = datetime.now(timezone.utc)
+                if parsed.date() == now_utc.date():
+                    return now_utc.replace(tzinfo=None).strftime(_TS_FMT)
                 parsed = parsed.replace(hour=23, minute=59, second=59)
             return parsed.strftime(_TS_FMT)
         except Exception:
