@@ -958,20 +958,24 @@ class Runner:
                     if unique_added > 0:
                         if global_limit is not None:
                             logger.info(
-                                "%s ~ %s: Collected %d / %d tweets sent_at=%s",
+                                "%s ~ %s: Collected %d / %d tweets sent_at=%s account=%s worker_id=%s",
                                 task_query.get("since"),
                                 task_query.get("until"),
                                 total_collected,
                                 global_limit,
                                 page_request_sent_at.isoformat(),
+                                account.get("username"),
+                                worker_id,
                             )
                         else:
                             logger.info(
-                                "%s ~ %s: Collected %d tweets sent_at=%s",
+                                "%s ~ %s: Collected %d tweets sent_at=%s account=%s worker_id=%s",
                                 task_query.get("since"),
                                 task_query.get("until"),
                                 total_collected,
                                 page_request_sent_at.isoformat(),
+                                account.get("username"),
+                                worker_id,
                             )
 
                     if page_unique_tweets and on_tweets_batch is not None:
