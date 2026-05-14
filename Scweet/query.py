@@ -275,8 +275,8 @@ def _query_time_token(ts: str | None) -> str:
     if not ts:
         return ""
     text = _as_str(ts)
-    if text.endswith("_UTC"):
-        return text[:-4]
+    # if text.endswith("_UTC"):
+    #     return text[:-4]
     return text
 
 
